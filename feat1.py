@@ -47,8 +47,8 @@ async def predict_loan_approval(data: LoanApplication):
     # Make prediction
     prediction = model.predict(input_data_scaled)[0][0]
 
-    result = "Approved" if prediction > 0.5 else "Rejected"
-    return {"loan_approval_status": result}
+    result = round(prediction * 100, 2)
+    return {"approve_chances": result}
 
 if __name__ == "__main__":
     import uvicorn
