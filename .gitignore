@@ -1,1 +1,5 @@
 env
+.env
+chatbot/chroma_db
+chatbot/loan_data.pdf
+chatbot/load_db.ipynb
