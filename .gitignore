@@ -1,6 +1,8 @@
 env
 .env
 chroma_db
+chroma_db_new
 chatbot/loan_data.pdf
+chatbot/loan_data_new.pdf
 chatbot/load_db.ipynb
 x_train.npy

@@ -99,7 +99,7 @@ def get_llm_explanation(shap_dict, prediction):
 
 ### Loan & Finance Chatbot Setup ###
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vectorstore = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
+vectorstore = Chroma(persist_directory="chroma_db_new", embedding_function=embeddings)
 retriever = vectorstore.as_retriever()
 
 def custom_retriever(query):

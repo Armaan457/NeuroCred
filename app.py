@@ -70,7 +70,7 @@ def chat_with_bot():
     if st.button("Ask"):
         response = requests.post(f"{API_BASE_URL}/chat", params={"query": query})
         result = response.json()
-        st.write("Answer:", result["answer"])
+        st.write(result["answer"])
 
 def main():
     st.title("Loan Assistant")
