@@ -3,3 +3,4 @@ env
 chroma_db
 chatbot/loan_data.pdf
 chatbot/load_db.ipynb
+x_train.npy
