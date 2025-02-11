@@ -63,7 +63,7 @@ async def predict_loan_approval(data: LoanApplication):
     # Create DataFrame with SHAP values
     feature_importance = pd.DataFrame({
         'Feature': FEATURES,  # Ensure FEATURE names match
-        'SHAP Value': shap_values.values[0]
+        'SHAP Value': shap_values.values[0].round(4),
     }).sort_values(by="SHAP Value", key=abs, ascending=False)  # Sort by importance
 
     # Convert SHAP values to dictionary for LLM
@@ -157,7 +157,7 @@ class CIBILScoreCalculator:
         if days_late_avg > 0:
             late_penalty = min(days_late_avg / 90, 1)
             base_score *= (1 - late_penalty * 0.5)
-        return base_score
+        return round(base_score,2)
 
     def calculate_credit_utilization_score(self, utilization_percent: float) -> float:
         if utilization_percent <= 10:
@@ -186,12 +186,12 @@ class CIBILScoreCalculator:
         if total_products == 0:
             return 0.30
         diversity_score = min(num_secured_loans, 2) * 0.3 + min(num_unsecured_loans, 2) * 0.2 + int(has_credit_card) * 0.2
-        return min(diversity_score, 1.0)
+        return round(min(diversity_score, 1.0), 4)
 
     def calculate_new_credit_score(self, num_inquiries_6months: int, num_new_accounts_6months: int) -> float:
         inquiry_penalty = min(num_inquiries_6months * 0.15, 0.60)
         new_account_penalty = min(num_new_accounts_6months * 0.20, 0.60)
-        return 1.0 - max(inquiry_penalty, new_account_penalty)
+        return round(1.0 - max(inquiry_penalty, new_account_penalty), 4)
 
     def calculate_final_score(self, components: Dict[str, float]) -> Tuple[int, Dict[str, float]]:
         total_score = sum(components[comp] * self.weights[comp] * self.SCORE_RANGE for comp in components)
