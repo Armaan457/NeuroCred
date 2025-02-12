@@ -21,7 +21,7 @@ NeuroCred is a all in one platform for helping users regarding loans and finance
 
 ## Tech Stack
 - **Backend:** FastAPI
-- **AI/ML:** , TensorFlow, SHAP and LangChain
+- **AI/ML:** TensorFlow, SHAP and LangChain
 - **Database:** Chroma
 
 ## Setup
@@ -47,7 +47,7 @@ Install dependencies:
 Run the Backend server:
 
 ```sh
-> python run api.py
+> python api.py
 ```
 
 ## API Endpoints
