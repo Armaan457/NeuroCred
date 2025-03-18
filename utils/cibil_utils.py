@@ -1,26 +1,11 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import Dict, Tuple
-from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
 import os
-
+from langchain_groq import ChatGroq
 from dotenv import load_dotenv
+from models.cibil_model import CIBILScoreRequest 
+from typing import Dict, Tuple
+
 load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
-
-app = FastAPI()
-
-class CIBILScoreRequest(BaseModel):
-    on_time_payments_percent: float
-    days_late_avg: float = 0
-    utilization_percent: float = 0
-    credit_age_years: float = 0
-    num_secured_loans: int = 0
-    num_unsecured_loans: int = 0
-    has_credit_card: bool = False
-    num_inquiries_6months: int = 0
-    num_new_accounts_6months: int = 0
 
 class CIBILScoreCalculator:
     def __init__(self):
@@ -40,7 +25,7 @@ class CIBILScoreCalculator:
         if days_late_avg > 0:
             late_penalty = min(days_late_avg / 90, 1)
             base_score *= (1 - late_penalty * 0.5)
-        return base_score
+        return round(base_score, 2)
 
     def calculate_credit_utilization_score(self, utilization_percent: float) -> float:
         if utilization_percent <= 10:
@@ -69,12 +54,12 @@ class CIBILScoreCalculator:
         if total_products == 0:
             return 0.30
         diversity_score = min(num_secured_loans, 2) * 0.3 + min(num_unsecured_loans, 2) * 0.2 + int(has_credit_card) * 0.2
-        return min(diversity_score, 1.0)
+        return round(min(diversity_score, 1.0), 4)
 
     def calculate_new_credit_score(self, num_inquiries_6months: int, num_new_accounts_6months: int) -> float:
         inquiry_penalty = min(num_inquiries_6months * 0.15, 0.60)
         new_account_penalty = min(num_new_accounts_6months * 0.20, 0.60)
-        return 1.0 - max(inquiry_penalty, new_account_penalty)
+        return round(1.0 - max(inquiry_penalty, new_account_penalty), 4)
 
     def calculate_final_score(self, components: Dict[str, float]) -> Tuple[int, Dict[str, float]]:
         total_score = sum(components[comp] * self.weights[comp] * self.SCORE_RANGE for comp in components)
@@ -91,26 +76,16 @@ class CIBILScoreCalculator:
         }
         return self.calculate_final_score(components)
 
-calculator = CIBILScoreCalculator()
-llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key = groq_api_key)
 
-@app.post("/calculate_cibil")
-async def calculate_cibil(request: CIBILScoreRequest):
-    score, contributions = calculator.calculate_score(request)
-    improvement_suggestions = await get_improvement_suggestions(score, contributions)
-    return {"CIBIL Score": score, "Breakdown": contributions, "Suggestions": improvement_suggestions}
+llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
 
-
-async def get_improvement_suggestions(score: int, breakdown: Dict[str, float]) -> str:
+async def get_improvement_suggestions(score, breakdown):
     prompt = f"""
-    The user has a CIBIL score of {score}. Here is a breakdown:
-    {breakdown}
-    Suggest improvements to increase their score.
-    Answer in crisp and user-friendly language.
+    You are an expert about CIBIL scores and it's influencing factors
+    CIBIL score: {score}
+    Breakdown: {breakdown}
+    
+    Suggest long and short term strategies to improve it. DON'T MENTION that you referred the score or breakdown
     """
     response = llm.invoke(prompt)
     return response.content
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

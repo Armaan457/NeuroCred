@@ -47,7 +47,7 @@ Install dependencies:
 Run the Backend server:
 
 ```sh
-> python api.py
+> python main.py
 ```
 
 ## API Endpoints
