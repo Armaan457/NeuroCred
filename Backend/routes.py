@@ -1,24 +1,11 @@
-from fastapi import FastAPI, Query, HTTPException, status
+from fastapi import Query, HTTPException, status
 from models.loan_model import LoanApplication
 from models.cibil_model import CIBILScoreRequest
 from utils.chatbot_utils import chain
 from utils.loan_predictor_utils import get_explanation
 from utils.cibil_utils import get_improvement_suggestions, CIBILScoreCalculator
 from utils.loan_predictor_utils import predict_with_shap
-from utils.loader import load_model, load_scaler, load_explainer
-from concurrent.futures import ThreadPoolExecutor
 
-with ThreadPoolExecutor() as executor:
-    model_future = executor.submit(load_model)
-    scaler_future = executor.submit(load_scaler)
-    explainer_future = executor.submit(load_explainer)
-
-    model = model_future.result()
-    scaler = scaler_future.result()
-    explainer = explainer_future.result()
-
-
-app = FastAPI()
 
 calculator = CIBILScoreCalculator()
 
@@ -66,7 +53,3 @@ async def chat(query: str = Query(..., title="Search Query")):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

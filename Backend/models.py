@@ -1,5 +1,14 @@
 from pydantic import BaseModel
 
+class LoanApplication(BaseModel):
+    no_of_dependents: int
+    education: str
+    self_employed: bool
+    income_annum: int
+    loan_amount: int
+    loan_term: int
+    cibil_score: int
+
 class CIBILScoreRequest(BaseModel):
     on_time_payments_percent: float
     days_late_avg: float = 0
