@@ -83,3 +83,8 @@ NeuroCred is a comprehensive full stack fintech platform that empowers users wit
     ```bash
     npm run dev
     ```
+
+## Developers
+
+- [Armaan Jagirdar](https://github.com/Armaan457)
+- [Khusham Bansal](https://github.com/KhushamBansal)
