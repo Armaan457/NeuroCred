@@ -18,11 +18,15 @@ NeuroCred is a comprehensive full stack fintech platform that empowers users wit
 - Answers finance and loan related queries
 - Uses Chroma vector database for retrieving relevant information
 
+### 4. MLOps and Tracking
+- Uses MLflow for experiment tracking and DVC for data versioning
+
 ## Tech Stack
 
 - **Frontend**: Next, Framer Motion and Tailwind CSS
 - **Backend**: FastAPI
-- **AI/ML**: TensorFlow, SHAP, LangChain, MLflow
+- **AI/ML**: TensorFlow, SHAP and LangChain
+- **MLOps**: MLflow and DVC
 
 ## Setup
 
