@@ -14,12 +14,12 @@ const Hero = () => {
           <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
             <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
               <span className="block mt-2 bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
-              Quick and Easy Loans for Your Financial Needs.
+              AI-Powered Loan Prediction & Financial Learning Platform
               </span>
             </h1>
             
             <p className="text-xl text-gray-600 font-medium max-w-2xl">
-            Our loan services offer a hassle-free and streamlined borrowing experience, providing you with the funds you need in a timely manner to meet your financial requirements.
+            Experience intelligent loan eligibility predictions and credit scoring simulations. Learn about financial decision making through our advanced AI models. Please note that we're an educational and prediction platform, not a lending institution.
             </p>
             
             <div className="pt-4">

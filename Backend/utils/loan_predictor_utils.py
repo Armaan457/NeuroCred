@@ -71,6 +71,9 @@ async def get_explanation(shap_dict, prediction):
     - **Clear & Simple:** Avoid jargon.
     - **Structured:** Use clear sections and bullet points.
     - **Maintain a Supportive and Professional Tone.**
+
+    **Important:**
+    - Do not state the explicit values of the factors.
     """
     
     response = llm.invoke(prompt)

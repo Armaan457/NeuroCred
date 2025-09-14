@@ -11,25 +11,25 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    title: "Fast Loan Approval - Instant decision on your application",
-    description: "Loan Approval & Rejection - Easy Application Judgment. Know Your Eligibility in Minutes!",
+    title: "Loan Eligibility Prediction - AI powered assessment simulation",
+    description: "Experience Loan Prediction Technology - Test Your Eligibility with Advanced AI Models!",
     Icon: Zap,
-    details: ["Instant decision-making", "Transparent approval criteria", "AI-driven accuracy"]
+    details: ["Instant prediction results", "Transparent evaluation criteria", "AI-driven accuracy for learning"]
   },
   {
-    title: "Custom Credit Scoring - Tailored to your financial profile",
-    description: "Know Your Financial Strength. We go beyond traditional credit scores!",
+    title: "CIBIL Score Simulation - Educational financial profiling",
+    description: "Understand Your Financial Profile. Learn how credit scoring works beyond traditional methods!",
     Icon: BarChart,
-    details: ["Real-time credit score updates", "Improved loan eligibility", "AI-based financial insights"]
+    details: ["Simulated credit score analysis", "Educational insights into improving CIBIL score", "AI-based financial learning tools"]
   },
   {
-    title: "Hassle-Free Application - Quick and secure loan processing",
-    description: "No paperwork. No long queues. Just a few clicks, and you’re done!",
+    title: "Interactive Learning Platform - Explore financial predictions",
+    description: "No real applications. No actual loans. Just powerful learning and prediction simulations!",
     Icon: Lock,
-    details: ["100% Online Process - Apply anytime, anywhere", "Secure KYC Verification - Digital verification for fast approval", "Track Your Application - Get real-time updates"]
-    // badge: "Coming Soon"
+    details: ["100% Educational Platform - Learn anytime, anywhere", "Safe Simulation Environment - Practice with realistic scenarios", "Track Your Learning - Monitor your financial knowledge growth"]
   }
 ];
+
 const Features = () => {
   return (
     <div id="features" className="text-class w-full py-16 px-4">
@@ -42,7 +42,7 @@ const Features = () => {
             </h2>
           </div>
           <p className="text-2xl text-gray-600">
-            Your AI-Powered Loan Plan Recommendation Partner
+            Your AI-Powered Financial Learning & Prediction Platform
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8 p-4">
@@ -52,36 +52,29 @@ const Features = () => {
               className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300
                         transform hover:-translate-y-2 group relative overflow-hidden"
             >
-              {/* Background Gradient Animation */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-blue-50 opacity-0
                             group-hover:opacity-100 transition-opacity duration-300" />
               
-              {/* Coming Soon Badge */}
               {feature.badge && (
                 <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold text-blue-600 bg-purple-100 rounded-full animate-pulse z-20">
                   {feature.badge}
                 </div>
               )}
               
-              {/* Content */}
               <div className="relative z-10">
-                {/* Icon */}
                 <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300">
                   <feature.Icon className="w-12 h-12 text-blue-600" />
                 </div>
                 
-                {/* Title */}
                 <h3 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600
                              transition-colors duration-300">
                   {feature.title}
                 </h3>
                 
-                {/* Description */}
                 <p className="text-xl text-gray-600 mb-6 group-hover:text-gray-700 transition-colors duration-300">
                   {feature.description}
                 </p>
                 
-                {/* Details List */}
                 <ul className="space-y-2">
                   {feature.details.map((detail, i) => (
                     <li

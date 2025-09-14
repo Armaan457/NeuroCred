@@ -123,27 +123,27 @@ const WorkingProcess: React.FC = () => {
 
   const steps = [
     {
-      step: 'Apply Online',
+      step: 'Enter Financial Data',
       description:
-        'Fill out a quick and secure loan application form with your personal and financial details',
+        'Input your financial information to simulate a loan application and explore how AI models evaluate creditworthiness',
       icon: Check,
     },
     {
-      step: 'Get Instant Credit Assessment',
+      step: 'Get AI Prediction Results',
       description:
-        'Our AI-powered system evaluates your credit score and eligibility within minutes.',
+        'Our advanced AI algorithms analyze your data and provide instant predictions about loan eligibility and credit scoring.',
       icon: MessageSquare,
     },
     {
-      step: 'Submit Documents for Verification',
+      step: 'Explore Learning Insights',
       description:
-        'Upload necessary documents (ID proof, income proof, and bank details) for fast processing.',
+        'Understand the factors that influence lending decisions and learn about financial health through detailed analysis.',
       icon: Search,
     },
     {
-      step: 'Receive Your Loan',
+      step: 'Download Your Report',
       description:
-        'Once approved, the loan amount is credited directly to your bank account.',
+        'Get a comprehensive educational report explaining the prediction results and recommendations for improvement.',
       icon: Award,
     },
   ];

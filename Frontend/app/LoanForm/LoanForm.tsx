@@ -60,6 +60,347 @@ const LoanApplicationForm: React.FC = () => {
     // }
   }, [router]);
 
+  // Function to generate and download PDF report
+  const generateAndDownloadReport = async (predictionData: LoanPredictionResponse, formData: LoanFormData) => {
+    try {
+      // Import jsPDF dynamically to avoid SSR issues
+      const { jsPDF } = await import('jspdf');
+      
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Helper function to add text with automatic wrapping and page breaks
+      const addText = (text: string, fontSize: number = 10, isBold: boolean = false, isCenter: boolean = false) => {
+        doc.setFontSize(fontSize);
+        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+        
+        const lines = doc.splitTextToSize(text, maxWidth);
+        
+        // Check if we need a new page
+        if (yPosition + (lines.length * fontSize * 0.5) > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        
+        lines.forEach((line: string) => {
+          const x = isCenter ? (pageWidth - doc.getTextWidth(line)) / 2 : margin;
+          doc.text(line, x, yPosition);
+          yPosition += fontSize * 0.5;
+        });
+        
+        yPosition += 5; // Add some spacing after text
+      };
+
+      // Helper function to add a section separator
+      const addSeparator = () => {
+        yPosition += 5;
+        doc.setDrawColor(0, 0, 0);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 10;
+      };
+
+      // Generate PDF content
+      const date = new Date().toLocaleDateString();
+      const time = new Date().toLocaleTimeString();
+      
+      // Helper function to get numeric value
+      const getNumericValue = (value: string | number): number => {
+        return typeof value === 'string' ? parseFloat(value) || 0 : value;
+      };
+
+      // Helper function to clean markdown formatting
+      const cleanMarkdown = (text: string): string => {
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '$1')
+          .replace(/\*(.*?)\*/g, '$1')
+          .replace(/#{1,6}\s/g, '')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .replace(/`([^`]+)`/g, '$1')
+          .replace(/^\s*[-*+]\s+/gm, '• ')
+          .replace(/^\s*\d+\.\s+/gm, (match) => {
+            const num = match.match(/\d+/)?.[0];
+            return `${num}. `;
+          })
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      };
+
+      const maxAbsValue = Math.max(...Object.values(predictionData.shap_values).map(v => Math.abs(v as number)));
+      
+      const getImpactLevel = (relativeImpact: number, rawValue: number) => {
+        if (rawValue === 0) return 'None';
+        
+        let level = '';
+        if (relativeImpact < 0.01) level = 'Minimal';
+        else if (relativeImpact >= 0.8) level = 'Very High';
+        else if (relativeImpact >= 0.6) level = 'High';
+        else if (relativeImpact >= 0.4) level = 'Medium';
+        else if (relativeImpact >= 0.2) level = 'Low';
+        else level = 'Very Low';
+        
+        // Add positive/negative prefix
+        const prefix = rawValue >= 0 ? '+' : '-';
+        return `${prefix} ${level}`;
+      };
+
+      // PDF Header
+      addText('LOAN PREDICTION REPORT', 18, true, true);
+      addText('NeuroCred Platform', 14, false, true);
+      addSeparator();
+
+      // Report Info
+      addText(`Report Generated: ${date} at ${time}`, 10);
+      addText('', 8); // Empty line
+      addText('DISCLAIMER: This is an AI-powered prediction for educational purposes only. This is NOT an official loan approval or rejection. Consult with licensed financial institutions for actual loan applications.', 9, false, false);
+      addSeparator();
+
+      // Prediction Summary
+      addText('PREDICTION SUMMARY', 14, true);
+      addText(`Approval Probability: ${predictionData.approve_chances}%`, 12, true);
+      addText(`Prediction Status: ${predictionData.approve_chances >= 50 ? 'LIKELY APPROVED' : 'LIKELY REJECTED'}`, 11, true);
+      addSeparator();
+
+      // Application Details
+      addText('APPLICATION DETAILS', 14, true);
+      addText('Personal Information:', 11, true);
+      addText(`• Number of Dependents: ${getNumericValue(formData.no_of_dependents)}`, 10);
+      addText(`• Education Level: ${formData.education}`, 10);
+      addText(`• Employment Type: ${formData.self_employed ? 'Self-Employed' : 'Employed'}`, 10);
+      addText('', 8);
+      addText('Financial Information:', 11, true);
+      addText(`• Annual Income: ₹${getNumericValue(formData.income_annum).toLocaleString()}`, 10);
+      addText(`• Loan Amount Requested: ₹${getNumericValue(formData.loan_amount).toLocaleString()}`, 10);
+      addText(`• Loan Term: ${getNumericValue(formData.loan_term)} months`, 10);
+      addText(`• CIBIL Score: ${getNumericValue(formData.cibil_score)}`, 10);
+      addSeparator();
+
+      // Factor Impact Analysis
+      addText('FACTOR IMPACT ANALYSIS', 14, true);
+      addText('Key Influencing Factors (ordered by impact):', 11, true);
+      addText('', 8);
+
+      const factors = Object.entries(predictionData.shap_values)
+        .map(([factor, value]) => {
+          const numValue = value as number;
+          const relativeImpact = maxAbsValue > 0 ? Math.abs(numValue) / maxAbsValue : 0;
+          const impactLevel = getImpactLevel(relativeImpact, numValue);
+          return {
+            factor: factor.replace(/_/g, ' ').toUpperCase(),
+            level: impactLevel,
+            relativeImpact
+          };
+        })
+        .sort((a, b) => b.relativeImpact - a.relativeImpact);
+
+      factors.forEach((item, index) => {
+        addText(`${index + 1}. ${item.factor}`, 10, true);
+        addText(`   Impact: ${item.level}`, 10);
+        addText('', 6);
+      });
+
+      addSeparator();
+
+      // Detailed Explanation
+      addText('DETAILED EXPLANATION', 14, true);
+      const cleanedExplanation = cleanMarkdown(predictionData.reason);
+      addText(cleanedExplanation, 10);
+      addSeparator();
+
+      // Next Steps
+      addText('NEXT STEPS', 14, true);
+      addText('Based on this prediction analysis:', 11, true);
+      addText('', 8);
+      addText('1. EDUCATIONAL PURPOSE: Use this analysis to understand how lending decisions might be influenced by various financial factors.', 10);
+      addText('', 6);
+      addText('2. IMPROVEMENT AREAS: Focus on the factors marked with "-" (negative impact) to potentially improve your financial profile.', 10);
+      addText('', 6);
+      addText('3. FINANCIAL PLANNING: Consider the recommendations provided in the detailed explanation section.', 10);
+      addText('', 6);
+      addText('4. REAL APPLICATIONS: For actual loan applications, contact licensed financial institutions and provide accurate, up-to-date information.', 10);
+      addSeparator();
+
+      // Legal Notice
+      addText('LEGAL NOTICE', 14, true);
+      addText('• This report is generated by an AI model for educational and simulation purposes', 10);
+      addText('• This is NOT a guarantee of loan approval or rejection from any financial institution', 10);
+      addText('• Results may vary based on actual lender criteria and current market conditions', 10);
+      addText('• Always consult with qualified financial advisors for real financial decisions', 10);
+      addText('• NeuroCred is not a licensed financial institution or lender', 10);
+      addText('', 10);
+      addText(`Report ID: NeuroCred-${Date.now()}`, 9);
+      addText('Generated by: NeuroCred AI Platform', 9);
+
+      // Save the PDF
+      doc.save(`loan-prediction-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      // Fallback to text download if PDF generation fails
+      generateTextReport(predictionData, formData);
+    }
+  };
+
+  // Fallback text report function
+  const generateTextReport = (predictionData: LoanPredictionResponse, formData: LoanFormData) => {
+    const reportContent = generateReportContent(predictionData, formData);
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `loan-prediction-report-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Function to generate report content
+  const generateReportContent = (predictionData: LoanPredictionResponse, formData: LoanFormData): string => {
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+    
+    // Helper function to get numeric value
+    const getNumericValue = (value: string | number): number => {
+      return typeof value === 'string' ? parseFloat(value) || 0 : value;
+    };
+
+    // Helper function to clean markdown formatting
+    const cleanMarkdown = (text: string): string => {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+        .replace(/\*(.*?)\*/g, '$1')     // Remove italic formatting
+        .replace(/#{1,6}\s/g, '')        // Remove headers
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+        .replace(/`([^`]+)`/g, '$1')     // Remove code formatting
+        .replace(/^\s*[-*+]\s+/gm, '• ') // Convert bullet points
+        .replace(/^\s*\d+\.\s+/gm, (match, offset, string) => {
+          const num = match.match(/\d+/)?.[0];
+          return `${num}. `;
+        }) // Clean numbered lists
+        .replace(/\n{3,}/g, '\n\n')      // Remove excessive line breaks
+        .trim();
+    };
+
+    const maxAbsValue = Math.max(...Object.values(predictionData.shap_values).map(v => Math.abs(v as number)));
+    
+    const getImpactLevel = (relativeImpact: number, rawValue: number) => {
+      if (rawValue === 0) return 'None';
+      
+      let level = '';
+      if (relativeImpact < 0.01) level = 'Minimal';
+      else if (relativeImpact >= 0.8) level = 'Very High';
+      else if (relativeImpact >= 0.6) level = 'High';
+      else if (relativeImpact >= 0.4) level = 'Medium';
+      else if (relativeImpact >= 0.2) level = 'Low';
+      else level = 'Very Low';
+      
+      // Add positive/negative prefix
+      const prefix = rawValue >= 0 ? '+' : '-';
+      return `${prefix} ${level}`;
+    };
+
+    return `
+═══════════════════════════════════════════════════════════════════════════════
+                LOAN PREDICTION REPORT -  NeuroCred Platform
+═══════════════════════════════════════════════════════════════════════════════
+
+Report Generated: ${date} at ${time}
+
+DISCLAIMER: This is an AI-powered prediction for educational purposes only. 
+This is NOT an official loan approval or rejection. Consult with licensed 
+financial institutions for actual loan applications.
+
+═══════════════════════════════════════════════════════════════════════════════
+                              PREDICTION SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+Approval Probability: ${predictionData.approve_chances}%
+Prediction Status: ${predictionData.approve_chances >= 50 ? 'LIKELY APPROVED' : 'LIKELY REJECTED'}
+
+═══════════════════════════════════════════════════════════════════════════════
+                             APPLICATION DETAILS
+═══════════════════════════════════════════════════════════════════════════════
+
+Personal Information:
+• Number of Dependents: ${getNumericValue(formData.no_of_dependents)}
+• Education Level: ${formData.education}
+• Employment Type: ${formData.self_employed ? 'Self-Employed' : 'Employed'}
+
+Financial Information:
+• Annual Income: ₹${getNumericValue(formData.income_annum).toLocaleString()}
+• Loan Amount Requested: ₹${getNumericValue(formData.loan_amount).toLocaleString()}
+• Loan Term: ${getNumericValue(formData.loan_term)} months
+• CIBIL Score: ${getNumericValue(formData.cibil_score)}
+
+═══════════════════════════════════════════════════════════════════════════════
+                           FACTOR IMPACT ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+Key Influencing Factors (ordered by impact):
+
+${Object.entries(predictionData.shap_values)
+  .map(([factor, value]) => {
+    const numValue = value as number;
+    const relativeImpact = maxAbsValue > 0 ? Math.abs(numValue) / maxAbsValue : 0;
+    const impactLevel = getImpactLevel(relativeImpact, numValue);
+    return {
+      factor: factor.replace(/_/g, ' ').toUpperCase(),
+      level: impactLevel,
+      relativeImpact
+    };
+  })
+  .sort((a, b) => b.relativeImpact - a.relativeImpact)
+  .map((item, index) => 
+    `${index + 1}. ${item.factor}
+   Impact-> ${item.level}
+`).join('\n')}
+
+═══════════════════════════════════════════════════════════════════════════════
+                              DETAILED EXPLANATION
+═══════════════════════════════════════════════════════════════════════════════
+
+${cleanMarkdown(predictionData.reason)}
+
+═══════════════════════════════════════════════════════════════════════════════
+                                  NEXT STEPS
+═══════════════════════════════════════════════════════════════════════════════
+
+Based on this prediction analysis:
+
+1. EDUCATIONAL PURPOSE: Use this analysis to understand how lending decisions 
+   might be influenced by various financial factors.
+
+2. IMPROVEMENT AREAS: Focus on the factors marked with "-" (negative impact) to potentially 
+   improve your financial profile.
+
+3. FINANCIAL PLANNING: Consider the recommendations provided in the detailed 
+   explanation section.
+
+4. REAL APPLICATIONS: For actual loan applications, contact licensed financial 
+   institutions and provide accurate, up-to-date information.
+
+═══════════════════════════════════════════════════════════════════════════════
+                                   LEGAL NOTICE
+═══════════════════════════════════════════════════════════════════════════════
+
+• This report is generated by an AI model for educational and simulation purposes
+• This is NOT a guarantee of loan approval or rejection from any financial institution
+• Results may vary based on actual lender criteria and current market conditions
+• Always consult with qualified financial advisors for real financial decisions
+• NeuroCred is not a licensed financial institution or lender
+
+Report ID: NeuroCred-${Date.now()}
+Generated by: NeuroCred Platform
+
+End of Report
+═══════════════════════════════════════════════════════════════════════════════
+    `.trim();
+  };
+
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
 
@@ -370,9 +711,39 @@ const LoanApplicationForm: React.FC = () => {
               <div className="shap-items">
                 {(() => {
                   const shapValues = Object.values(predictionResult.shap_values) as number[];
+                  const maxAbsValue = Math.max(...shapValues.map(v => Math.abs(v)));
+                  
                   return Object.entries(predictionResult.shap_values).map(([factor, value]) => {
-                    const impactValue = (value as number) * 100;
-                    const factorColor = getFactorColor(value as number, shapValues);
+                    const numValue = value as number;
+                    const factorColor = getFactorColor(numValue, shapValues);
+                    
+                    // Method 1: Impact Score (0-100 scale based on relative importance)
+                    const relativeImpact = maxAbsValue > 0 ? Math.abs(numValue) / maxAbsValue : 0;
+                    // Use a minimum threshold to avoid showing 0 for very small but non-zero values
+                    const impactScore = relativeImpact < 0.01 && numValue !== 0 
+                      ? 1 // Show at least 1 for non-zero values
+                      : Math.round(relativeImpact * 100);
+                    
+                    // Method 2: Raw SHAP value with better formatting
+                    const formattedValue = numValue.toFixed(4);
+                    
+                    // Method 3: Impact level description
+                    const getImpactLevel = (relativeImpact: number, rawValue: number) => {
+                      // Handle very small values differently
+                      if (rawValue === 0) return 'None';
+                      
+                      let level = '';
+                      if (relativeImpact < 0.01) level = 'Minimal';
+                      else if (relativeImpact >= 0.8) level = 'Very High';
+                      else if (relativeImpact >= 0.6) level = 'High';
+                      else if (relativeImpact >= 0.4) level = 'Medium';
+                      else if (relativeImpact >= 0.2) level = 'Low';
+                      else level = 'Very Low';
+                      
+                      // Add positive/negative prefix
+                      const prefix = rawValue >= 0 ? '+' : '-';
+                      return `${prefix} ${level}`;
+                    };
                     
                     return (
                       <div key={factor} className="shap-item">
@@ -385,7 +756,7 @@ const LoanApplicationForm: React.FC = () => {
                           className="factor-value"
                           style={{ color: factorColor }}
                         >
-                          {impactValue >= 0 ? '+' : ''}{impactValue.toFixed(2)}%
+                          {getImpactLevel(relativeImpact, numValue)}
                         </span>
                       </div>
                     );
@@ -396,6 +767,22 @@ const LoanApplicationForm: React.FC = () => {
             <div className="explanation">
               <h4>Explanation:</h4>
               <MarkdownRenderer content={predictionResult.reason} className="explanation-content" />
+            </div>
+            
+            {/* Download Report Button */}
+            <div className="download-section">
+              <motion.button
+                type="button"
+                onClick={() => generateAndDownloadReport(predictionResult, formData)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="download-report-button"
+              >
+                📄 Download PDF Report
+              </motion.button>
+              <p className="download-note">
+                Get a comprehensive PDF report with your prediction results, factor analysis, and improvement recommendations.
+              </p>
             </div>
           </div>
         )}

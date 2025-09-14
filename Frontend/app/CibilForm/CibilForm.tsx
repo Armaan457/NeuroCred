@@ -49,6 +49,313 @@ const CibilScoreForm: React.FC = () => {
     message?: string;
   }>({});
 
+  // Function to generate and download PDF report for CIBIL Score
+  const generateAndDownloadCibilReport = async (cibilData: CIBILScoreResponse, formData: CibilFormData) => {
+    try {
+      // Import jsPDF dynamically to avoid SSR issues
+      const { jsPDF } = await import('jspdf');
+      
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Helper function to add text with automatic wrapping and page breaks
+      const addText = (text: string, fontSize: number = 10, isBold: boolean = false, isCenter: boolean = false) => {
+        doc.setFontSize(fontSize);
+        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+        
+        const lines = doc.splitTextToSize(text, maxWidth);
+        
+        // Check if we need a new page
+        if (yPosition + (lines.length * fontSize * 0.5) > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        
+        lines.forEach((line: string) => {
+          const x = isCenter ? (pageWidth - doc.getTextWidth(line)) / 2 : margin;
+          doc.text(line, x, yPosition);
+          yPosition += fontSize * 0.5;
+        });
+        
+        yPosition += 5; // Add some spacing after text
+      };
+
+      // Helper function to add a section separator
+      const addSeparator = () => {
+        yPosition += 5;
+        doc.setDrawColor(0, 0, 0);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 10;
+      };
+
+      // Generate PDF content
+      const date = new Date().toLocaleDateString();
+      const time = new Date().toLocaleTimeString();
+      
+      // Helper function to get numeric value
+      const getNumericValue = (value: string | number): number => {
+        return typeof value === 'string' ? parseFloat(value) || 0 : value;
+      };
+
+      // Helper function to clean markdown formatting
+      const cleanMarkdown = (text: string): string => {
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '$1')
+          .replace(/\*(.*?)\*/g, '$1')
+          .replace(/#{1,6}\s/g, '')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .replace(/`([^`]+)`/g, '$1')
+          .replace(/^\s*[-*+]\s+/gm, '• ')
+          .replace(/^\s*\d+\.\s+/gm, (match) => {
+            const num = match.match(/\d+/)?.[0];
+            return `${num}. `;
+          })
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      };
+
+      // PDF Header
+      addText('CIBIL SCORE ANALYSIS REPORT', 18, true, true);
+      addText('NeuroCred Platform', 14, false, true);
+      addSeparator();
+
+      // Report Info
+      addText(`Report Generated: ${date} at ${time}`, 10);
+      addText('', 8); // Empty line
+      addText('DISCLAIMER: This is an AI-powered analysis for educational purposes only. This is NOT an official CIBIL score. Consult with licensed financial institutions for actual credit reports.', 9, false, false);
+      addSeparator();
+
+      // CIBIL Score Summary
+      addText('CIBIL SCORE SUMMARY', 14, true);
+      addText(`Calculated CIBIL Score: ${cibilData['CIBIL Score']}`, 12, true);
+      const scoreCategory = cibilData['CIBIL Score'] >= 750 ? 'EXCELLENT' : 
+                           cibilData['CIBIL Score'] >= 650 ? 'GOOD' : 'NEEDS IMPROVEMENT';
+      addText(`Score Category: ${scoreCategory}`, 11, true);
+      addSeparator();
+
+      // Input Details
+      addText('INPUT DETAILS', 14, true);
+      addText('Payment History:', 11, true);
+      addText(`• On-Time Payments: ${getNumericValue(formData.on_time_payments_percent)}%`, 10);
+      addText(`• Average Days Late: ${getNumericValue(formData.days_late_avg)} days`, 10);
+      addText('', 8);
+      addText('Credit Utilization:', 11, true);
+      addText(`• Credit Utilization: ${getNumericValue(formData.utilization_percent)}%`, 10);
+      addText('', 8);
+      addText('Credit Profile:', 11, true);
+      addText(`• Credit Age: ${getNumericValue(formData.credit_age_years)} years`, 10);
+      addText(`• Secured Loans: ${getNumericValue(formData.num_secured_loans)}`, 10);
+      addText(`• Unsecured Loans: ${getNumericValue(formData.num_unsecured_loans)}`, 10);
+      addText(`• Has Credit Card: ${formData.has_credit_card ? 'Yes' : 'No'}`, 10);
+      addText(`• Credit Inquiries (6 months): ${getNumericValue(formData.num_inquiries_6months)}`, 10);
+      addText(`• New Accounts (6 months): ${getNumericValue(formData.num_new_accounts_6months)}`, 10);
+      addSeparator();
+
+      // Score Breakdown Analysis
+      addText('SCORE BREAKDOWN ANALYSIS', 14, true);
+      addText('Component-wise Impact on Your CIBIL Score:', 11, true);
+      addText('', 8);
+
+      const breakdown = Object.entries(cibilData.Breakdown)
+        .map(([factor, value]) => ({
+          factor: factor.replace(/_/g, ' ').toUpperCase(),
+          percentage: ((value as number) * 100).toFixed(1),
+          value: value as number
+        }))
+        .sort((a, b) => b.value - a.value);
+
+      breakdown.forEach((item, index) => {
+        addText(`${index + 1}. ${item.factor}`, 10, true);
+        addText(`   Contribution: ${item.percentage}%`, 10);
+        addText('', 6);
+      });
+
+      addSeparator();
+
+      // Improvement Suggestions
+      addText('IMPROVEMENT SUGGESTIONS', 14, true);
+      const cleanedSuggestions = cleanMarkdown(cibilData.Suggestions);
+      addText(cleanedSuggestions, 10);
+      addSeparator();
+
+      // Action Plan
+      addText('RECOMMENDED ACTION PLAN', 14, true);
+      addText('Based on your current score analysis:', 11, true);
+      addText('', 8);
+      addText('1. EDUCATIONAL PURPOSE: Use this analysis to understand credit scoring factors and their relative importance.', 10);
+      addText('', 6);
+      addText('2. FOCUS AREAS: Prioritize improving the components with the lowest contribution percentages.', 10);
+      addText('', 6);
+      addText('3. FINANCIAL PLANNING: Implement the improvement suggestions gradually over time.', 10);
+      addText('', 6);
+      addText('4. REAL CREDIT MONITORING: For actual credit scores, obtain official reports from authorized bureaus.', 10);
+      addSeparator();
+
+      // Legal Notice
+      addText('LEGAL NOTICE', 14, true);
+      addText('• This report is generated by an AI model for educational and simulation purposes', 10);
+      addText('• This is NOT an official CIBIL score from credit bureaus', 10);
+      addText('• Actual credit scores may vary based on bureau-specific algorithms and data', 10);
+      addText('• Always consult with authorized credit bureaus for official credit reports', 10);
+      addText('• NeuroCred is not a credit bureau or financial institution', 10);
+      addText('', 10);
+      addText(`Report ID: NeuroCred-CIBIL-${Date.now()}`, 9);
+      addText('Generated by: NeuroCred AI Platform', 9);
+
+      // Save the PDF
+      doc.save(`cibil-score-analysis-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+    } catch (error) {
+      console.error('Error generating CIBIL PDF:', error);
+      // Fallback to text download if PDF generation fails
+      generateCibilTextReport(cibilData, formData);
+    }
+  };
+
+  // Fallback text report function for CIBIL
+  const generateCibilTextReport = (cibilData: CIBILScoreResponse, formData: CibilFormData) => {
+    const reportContent = generateCibilReportContent(cibilData, formData);
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cibil-score-analysis-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Function to generate CIBIL report content
+  const generateCibilReportContent = (cibilData: CIBILScoreResponse, formData: CibilFormData): string => {
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+    
+    // Helper function to get numeric value
+    const getNumericValue = (value: string | number): number => {
+      return typeof value === 'string' ? parseFloat(value) || 0 : value;
+    };
+
+    // Helper function to clean markdown formatting
+    const cleanMarkdown = (text: string): string => {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+        .replace(/\*(.*?)\*/g, '$1')     // Remove italic formatting
+        .replace(/#{1,6}\s/g, '')        // Remove headers
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+        .replace(/`([^`]+)`/g, '$1')     // Remove code formatting
+        .replace(/^\s*[-*+]\s+/gm, '• ') // Convert bullet points
+        .replace(/^\s*\d+\.\s+/gm, (match, offset, string) => {
+          const num = match.match(/\d+/)?.[0];
+          return `${num}. `;
+        }) // Clean numbered lists
+        .replace(/\n{3,}/g, '\n\n')      // Remove excessive line breaks
+        .trim();
+    };
+
+    const scoreCategory = cibilData['CIBIL Score'] >= 750 ? 'EXCELLENT' : 
+                         cibilData['CIBIL Score'] >= 650 ? 'GOOD' : 'NEEDS IMPROVEMENT';
+
+    return `
+═══════════════════════════════════════════════════════════════════════════════
+            CIBIL SCORE ANALYSIS REPORT - NeuroCred Platform
+═══════════════════════════════════════════════════════════════════════════════
+
+Report Generated: ${date} at ${time}
+
+DISCLAIMER: This is an AI-powered analysis for educational purposes only. 
+This is NOT an official CIBIL score. Consult with licensed financial 
+institutions for actual credit reports.
+
+═══════════════════════════════════════════════════════════════════════════════
+                            CIBIL SCORE SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+Calculated CIBIL Score: ${cibilData['CIBIL Score']}
+Score Category: ${scoreCategory}
+
+═══════════════════════════════════════════════════════════════════════════════
+                               INPUT DETAILS
+═══════════════════════════════════════════════════════════════════════════════
+
+Payment History:
+• On-Time Payments: ${getNumericValue(formData.on_time_payments_percent)}%
+• Average Days Late: ${getNumericValue(formData.days_late_avg)} days
+
+Credit Utilization:
+• Credit Utilization: ${getNumericValue(formData.utilization_percent)}%
+
+Credit Profile:
+• Credit Age: ${getNumericValue(formData.credit_age_years)} years
+• Secured Loans: ${getNumericValue(formData.num_secured_loans)}
+• Unsecured Loans: ${getNumericValue(formData.num_unsecured_loans)}
+• Has Credit Card: ${formData.has_credit_card ? 'Yes' : 'No'}
+• Credit Inquiries (6 months): ${getNumericValue(formData.num_inquiries_6months)}
+• New Accounts (6 months): ${getNumericValue(formData.num_new_accounts_6months)}
+
+═══════════════════════════════════════════════════════════════════════════════
+                          SCORE BREAKDOWN ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+Component-wise Impact on Your CIBIL Score:
+
+${Object.entries(cibilData.Breakdown)
+  .map(([factor, value]) => ({
+    factor: factor.replace(/_/g, ' ').toUpperCase(),
+    percentage: ((value as number) * 100).toFixed(1),
+    value: value as number
+  }))
+  .sort((a, b) => b.value - a.value)
+  .map((item, index) => 
+    `${index + 1}. ${item.factor}
+   Contribution: ${item.percentage}%
+`).join('\n')}
+
+═══════════════════════════════════════════════════════════════════════════════
+                            IMPROVEMENT SUGGESTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+${cleanMarkdown(cibilData.Suggestions)}
+
+═══════════════════════════════════════════════════════════════════════════════
+                           RECOMMENDED ACTION PLAN
+═══════════════════════════════════════════════════════════════════════════════
+
+Based on your current score analysis:
+
+1. EDUCATIONAL PURPOSE: Use this analysis to understand credit scoring factors 
+   and their relative importance.
+
+2. FOCUS AREAS: Prioritize improving the components with the lowest contribution 
+   percentages.
+
+3. FINANCIAL PLANNING: Implement the improvement suggestions gradually over time.
+
+4. REAL CREDIT MONITORING: For actual credit scores, obtain official reports 
+   from authorized bureaus.
+
+═══════════════════════════════════════════════════════════════════════════════
+                                   LEGAL NOTICE
+═══════════════════════════════════════════════════════════════════════════════
+
+• This report is generated by an AI model for educational and simulation purposes
+• This is NOT an official CIBIL score from credit bureaus
+• Actual credit scores may vary based on bureau-specific algorithms and data
+• Always consult with authorized credit bureaus for official credit reports
+• NeuroCred is not a credit bureau or financial institution
+
+Report ID: NeuroCred-CIBIL-${Date.now()}
+Generated by: NeuroCred Platform
+
+End of Report
+═══════════════════════════════════════════════════════════════════════════════
+    `.trim();
+  };
+
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
 
@@ -392,6 +699,22 @@ const CibilScoreForm: React.FC = () => {
             <div className="suggestions">
               <h4>Improvement Suggestions:</h4>
               <MarkdownRenderer content={cibilResult.Suggestions} className="suggestions-content" />
+            </div>
+            
+            {/* Download Report Button */}
+            <div className="download-section">
+              <motion.button
+                type="button"
+                onClick={() => generateAndDownloadCibilReport(cibilResult, formData)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="download-report-button"
+              >
+                📄 Download PDF Report
+              </motion.button>
+              <p className="download-note">
+                Get a comprehensive PDF report with your CIBIL score analysis, breakdown, and improvement recommendations.
+              </p>
             </div>
           </div>
         )}
