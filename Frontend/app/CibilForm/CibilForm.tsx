@@ -173,7 +173,7 @@ const CibilScoreForm: React.FC = () => {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 750) return '#4CAF50'; // Green
+    if (score >= 750) return '#66BB6A'; // Light Green
     if (score >= 650) return '#FF9800'; // Orange
     return '#F44336'; // Red
   };
@@ -187,50 +187,6 @@ const CibilScoreForm: React.FC = () => {
     >
       <form onSubmit={handleSubmit} className="cibil-form">
         <h2>CIBIL Score Calculator</h2>
-
-        {submitStatus.message && (
-          <div className={`status-message ${submitStatus.success ? 'success' : 'error'}`}>
-            {submitStatus.message}
-          </div>
-        )}
-
-        {/* Display CIBIL results */}
-        {cibilResult && (
-          <div className="cibil-results">
-            <div 
-              className="score-display"
-              style={{ borderColor: getScoreColor(cibilResult['CIBIL Score']) }}
-            >
-              <div className="score-number" style={{ color: getScoreColor(cibilResult['CIBIL Score']) }}>
-                {cibilResult['CIBIL Score']}
-              </div>
-              <div className="score-label">CIBIL Score</div>
-            </div>
-            
-            <div className="breakdown">
-              <h4>Score Breakdown:</h4>
-              <div className="breakdown-items">
-                {Object.entries(cibilResult.Breakdown).map(([factor, value]) => (
-                  <div key={factor} className="breakdown-item">
-                    <span className="factor-name">{factor.replace(/_/g, ' ')}</span>
-                    <div className="factor-bar">
-                      <div 
-                        className="factor-fill" 
-                        style={{ width: `${(value as number) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="factor-value">{((value as number) * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="suggestions">
-              <h4>Improvement Suggestions:</h4>
-              <MarkdownRenderer content={cibilResult.Suggestions} className="suggestions-content" />
-            </div>
-          </div>
-        )}
 
         <div className="form-row">
           <div className="form-group">
@@ -395,6 +351,50 @@ const CibilScoreForm: React.FC = () => {
         >
           {isLoading ? 'Calculating...' : 'Calculate CIBIL Score'}
         </button>
+
+        {submitStatus.message && (
+          <div className={`status-message ${submitStatus.success ? 'success' : 'error'}`} style={{ marginTop: '20px' }}>
+            {submitStatus.message}
+          </div>
+        )}
+
+        {/* Display CIBIL results */}
+        {cibilResult && (
+          <div className="cibil-results">
+            <div 
+              className="score-display"
+              style={{ borderColor: getScoreColor(cibilResult['CIBIL Score']) }}
+            >
+              <div className="score-number" style={{ color: getScoreColor(cibilResult['CIBIL Score']) }}>
+                {cibilResult['CIBIL Score']}
+              </div>
+              <div className="score-label">CIBIL Score</div>
+            </div>
+            
+            <div className="breakdown">
+              <h4>Score Breakdown:</h4>
+              <div className="breakdown-items">
+                {Object.entries(cibilResult.Breakdown).map(([factor, value]) => (
+                  <div key={factor} className="breakdown-item">
+                    <span className="factor-name">{factor.replace(/_/g, ' ')}</span>
+                    <div className="factor-bar">
+                      <div 
+                        className="factor-fill" 
+                        style={{ width: `${(value as number) * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="factor-value">{((value as number) * 100).toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="suggestions">
+              <h4>Improvement Suggestions:</h4>
+              <MarkdownRenderer content={cibilResult.Suggestions} className="suggestions-content" />
+            </div>
+          </div>
+        )}
       </form>
     </motion.div>
   );

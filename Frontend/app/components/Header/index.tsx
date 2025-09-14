@@ -17,8 +17,8 @@ const navBarLinks = [
   { title: "Home", href: "/" },
   { title: "Loan Prediction", href: "/LoanForm" },
   { title: "CIBIL Calculator", href: "/CibilForm" },
-  { title: "Features", href: "#features" },
-  { title: "How it Works", href: "#working-process" },
+  { title: "Features", href: "/#features" },
+  { title: "How it Works", href: "/#working-process" },
 ];
 
 const Navbar = () => {

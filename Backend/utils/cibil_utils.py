@@ -86,7 +86,7 @@ async def get_improvement_suggestions(score, breakdown):
     **Task:**
     1. Provide actionable strategies to improve a CIBIL score.
     2. Separate the advice into distinct "Short-Term Strategies" and "Long-Term Strategies" sections.
-    3. The advice should be general and based on common credit principles, not specific to any provided score or breakdown.
+    3. The advice should be specific to the provided score or breakdown.
     4. The output should be a helpful, informative response to the user.
 
     **Constraints:**
@@ -94,7 +94,7 @@ async def get_improvement_suggestions(score, breakdown):
     - Do not mention that you are an AI or that you are generating the advice based on context.
     - Maintain a professional and authoritative tone.
     - Be concise and to the point.
-    
+
     CIBIL score: {score}
     Breakdown: {breakdown}
         """

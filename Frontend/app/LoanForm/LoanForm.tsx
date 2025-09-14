@@ -170,6 +170,24 @@ const LoanApplicationForm: React.FC = () => {
     }
   };
 
+  const getApprovalColor = (percentage: number) => {
+    if (percentage >= 75) return '#66BB6A'; // Light Green
+    if (percentage >= 50) return '#FF9800'; // Orange  
+    if (percentage >= 25) return '#FFA726'; // Light Orange
+    return '#F44336'; // Red
+  };
+
+  const getFactorColor = (value: number, allValues: number[]) => {
+    const sortedValues = [...allValues].sort((a, b) => Math.abs(b) - Math.abs(a));
+    const rank = sortedValues.indexOf(value);
+    
+    if (rank === 0) return '#F44336'; // Highest impact - Red
+    if (rank === 1) return '#FF9800'; // High impact - Orange
+    if (rank === 2) return '#FFC107'; // Medium impact - Amber
+    if (rank === 3) return '#8BC34A'; // Low impact - Light Green
+    return '#9E9E9E'; // Lowest impact - Grey
+  };
+
   return (
     <motion.div 
       className="loan-form-container"
@@ -179,36 +197,6 @@ const LoanApplicationForm: React.FC = () => {
     >
       <form onSubmit={handleSubmit} className="loan-form">
         <h2>Loan Application</h2>
-
-        {submitStatus.message && (
-          <div className={`status-message ${submitStatus.success ? 'success' : 'error'}`}>
-            {submitStatus.message}
-          </div>
-        )}
-
-        {/* Display prediction results */}
-        {predictionResult && (
-          <div className="prediction-results">
-            <h3>Loan Approval Prediction Results</h3>
-            <div className="approval-chance">
-              <strong>Approval Chances: {predictionResult.approve_chances}%</strong>
-            </div>
-            <div className="shap-values">
-              <h4>Key Influencing Factors:</h4>
-              <ul>
-                {Object.entries(predictionResult.shap_values).map(([factor, value]) => (
-                  <li key={factor}>
-                    {factor.replace(/_/g, ' ')}: {((value as number) * 100).toFixed(2)}% impact
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="explanation">
-              <h4>Explanation:</h4>
-              <MarkdownRenderer content={predictionResult.reason} className="explanation-content" />
-            </div>
-          </div>
-        )}
 
         <div className="form-group">
           <label htmlFor="no_of_dependents">Number of Dependents*</label>
@@ -339,6 +327,59 @@ const LoanApplicationForm: React.FC = () => {
         >
           {isLoading ? 'Submitting...' : 'Submit Application'}
         </motion.button>
+
+        {submitStatus.message && (
+          <div className={`status-message ${submitStatus.success ? 'success' : 'error'}`} style={{ marginTop: '20px' }}>
+            {submitStatus.message}
+          </div>
+        )}
+
+        {/* Display prediction results */}
+        {predictionResult && (
+          <div className="prediction-results">
+            <h3>Loan Approval Prediction Results</h3>
+            <div 
+              className="approval-chance"
+              style={{ borderColor: getApprovalColor(predictionResult.approve_chances) }}
+            >
+              <div>
+                <strong style={{ color: getApprovalColor(predictionResult.approve_chances) }}>
+                  {predictionResult.approve_chances}%
+                </strong>
+                <div className="approval-chance-label">Approval Chances</div>
+              </div>
+            </div>
+            <div className="shap-values">
+              <h4>Key Influencing Factors:</h4>
+              <div className="shap-items">
+                {(() => {
+                  const shapValues = Object.values(predictionResult.shap_values) as number[];
+                  return Object.entries(predictionResult.shap_values).map(([factor, value]) => {
+                    const impactValue = (value as number) * 100;
+                    const factorColor = getFactorColor(value as number, shapValues);
+                    
+                    return (
+                      <div key={factor} className="shap-item">
+                        <span className="factor-name">{factor.replace(/_/g, ' ')}</span>
+                        <div 
+                          className="factor-indicator"
+                          style={{ backgroundColor: factorColor }}
+                        ></div>
+                        <span className="factor-value">
+                          {impactValue >= 0 ? '+' : ''}{impactValue.toFixed(2)}%
+                        </span>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+            <div className="explanation">
+              <h4>Explanation:</h4>
+              <MarkdownRenderer content={predictionResult.reason} className="explanation-content" />
+            </div>
+          </div>
+        )}
       </form>
     </motion.div>
   );
