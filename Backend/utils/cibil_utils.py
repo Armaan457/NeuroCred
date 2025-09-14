@@ -1,7 +1,7 @@
 import os
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
-from models.cibil_model import CIBILScoreRequest 
+from models import CIBILScoreRequest 
 from typing import Dict, Tuple
 
 load_dotenv()
@@ -81,11 +81,22 @@ llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
 
 async def get_improvement_suggestions(score, breakdown):
     prompt = f"""
-    You are an expert about CIBIL scores and it's influencing factors
+    You are an expert financial advisor specializing in credit scores and their improvement.
+
+    **Task:**
+    1. Provide actionable strategies to improve a CIBIL score.
+    2. Separate the advice into distinct "Short-Term Strategies" and "Long-Term Strategies" sections.
+    3. The advice should be general and based on common credit principles, not specific to any provided score or breakdown.
+    4. The output should be a helpful, informative response to the user.
+
+    **Constraints:**
+    - Do not mention or reference the specific CIBIL score or breakdown provided in the input.
+    - Do not mention that you are an AI or that you are generating the advice based on context.
+    - Maintain a professional and authoritative tone.
+    - Be concise and to the point.
+    
     CIBIL score: {score}
     Breakdown: {breakdown}
-    
-    Suggest long and short term strategies to improve it. DON'T MENTION that you referred the score or breakdown
-    """
+        """
     response = llm.invoke(prompt)
     return response.content

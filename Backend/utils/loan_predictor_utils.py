@@ -1,5 +1,5 @@
 import pandas as pd
-from models.loan_model import LoanApplication
+from models import LoanApplication
 import os
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
@@ -66,5 +66,6 @@ async def get_explanation(shap_dict, prediction):
     Avoid technical jargon and make the explanation easy to understand for someone without financial background.
     Structure your response with clear sections and bullet points where helpful.
     """
+    
     response = llm.invoke(prompt)
     return response.content

@@ -1,10 +1,9 @@
 from fastapi import Query, HTTPException, status
-from models.loan_model import LoanApplication
-from models.cibil_model import CIBILScoreRequest
+from main import app
+from models import LoanApplication, CIBILScoreRequest
 from utils.chatbot_utils import chain
-from utils.loan_predictor_utils import get_explanation
+from utils.loan_predictor_utils import get_explanation, predict_with_shap
 from utils.cibil_utils import get_improvement_suggestions, CIBILScoreCalculator
-from utils.loan_predictor_utils import predict_with_shap
 
 
 calculator = CIBILScoreCalculator()
