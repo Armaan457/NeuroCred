@@ -6,7 +6,7 @@ interface LoginFormProps {
   onSubmit?: (data: { email: string; password: string }) => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginForm: React.FC<LoginFormProps> = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     fullName: '',

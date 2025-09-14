@@ -66,7 +66,7 @@ const Chatbot: React.FC = () => {
       };
 
       setMessages(prev => [...prev, botMessage]);
-    } catch (error: any) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: 'Sorry, I encountered an error while processing your question. Please try again.',

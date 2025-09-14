@@ -1,7 +1,15 @@
 import React from 'react';
-import { Bot, Zap, BarChart, Lock } from 'lucide-react';
+import { Bot, Zap, BarChart, Lock, LucideIcon } from 'lucide-react';
 
-const features = [
+interface Feature {
+  title: string;
+  description: string;
+  Icon: LucideIcon;
+  details: string[];
+  badge?: string;
+}
+
+const features: Feature[] = [
   {
     title: "Fast Loan Approval – Instant decision on your application",
     description: "Loan Approval & Rejection – Easy Application Judgment. Know Your Eligibility in Minutes!",

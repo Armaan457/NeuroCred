@@ -36,7 +36,7 @@ type ProcessStepProps = {
   step: string;
   description: string;
   index: number;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   marginTop: number;
 };
 

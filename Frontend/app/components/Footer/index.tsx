@@ -1,7 +1,5 @@
 'use client';
-import Image from "next/image";
 import React from "react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -33,7 +31,7 @@ const Footer = () => {
             Get Started Today!
           </h2> */}
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Don't wait—apply for your loan now and get instant approval!
+            Don&apos;t wait—apply for your loan now and get instant approval!
           </p>
           <div>
           <button

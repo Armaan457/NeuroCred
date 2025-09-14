@@ -141,10 +141,10 @@ const CibilScoreForm: React.FC = () => {
           message: `CIBIL Score Calculated: ${result['CIBIL Score']}`
         });
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         setSubmitStatus({
           success: false,
-          message: error.message || 'An error occurred while calculating CIBIL score'
+          message: error instanceof Error ? error.message : 'An error occurred while calculating CIBIL score'
         });
       } finally {
         setIsLoading(false);

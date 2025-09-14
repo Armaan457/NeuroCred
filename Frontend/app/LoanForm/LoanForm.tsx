@@ -139,10 +139,10 @@ const LoanApplicationForm: React.FC = () => {
           message: `Loan Approval Prediction Complete! Approval Chances: ${result.approve_chances}%`
         });
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         setSubmitStatus({
           success: false,
-          message: error.message || 'An error occurred while processing your application'
+          message: error instanceof Error ? error.message : 'An error occurred while processing your application'
         });
       } finally {
         setIsLoading(false);

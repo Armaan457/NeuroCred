@@ -72,8 +72,8 @@ const OtpVerify: React.FC<OtpVerifyProps> = ({ email: initialEmail, onVerificati
       } else {
         throw new Error(data.message || 'Failed to resend OTP');
       }
-    } catch (error: any) {
-      setMessage(error.message || 'Failed to resend OTP');
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? error.message : 'Failed to resend OTP');
     } finally {
       setIsLoading(false);
     }
@@ -121,8 +121,8 @@ const OtpVerify: React.FC<OtpVerifyProps> = ({ email: initialEmail, onVerificati
       } else {
         throw new Error(data.message || 'Verification failed');
       }
-    } catch (error: any) {
-      setMessage(error.message || 'An error occurred. Please try again.');
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? error.message : 'An error occurred. Please try again.');
       console.error('Error:', error);
     } finally {
       setIsLoading(false);
