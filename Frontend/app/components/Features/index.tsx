@@ -11,22 +11,22 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    title: "Fast Loan Approval – Instant decision on your application",
-    description: "Loan Approval & Rejection – Easy Application Judgment. Know Your Eligibility in Minutes!",
+    title: "Fast Loan Approval - Instant decision on your application",
+    description: "Loan Approval & Rejection - Easy Application Judgment. Know Your Eligibility in Minutes!",
     Icon: Zap,
     details: ["Instant decision-making", "Transparent approval criteria", "AI-driven accuracy"]
   },
   {
-    title: "Custom Credit Scoring – Tailored to your financial profile",
+    title: "Custom Credit Scoring - Tailored to your financial profile",
     description: "Know Your Financial Strength. We go beyond traditional credit scores!",
     Icon: BarChart,
     details: ["Real-time credit score updates", "Improved loan eligibility", "AI-based financial insights"]
   },
   {
-    title: "Hassle-Free Application – Quick and secure loan processing",
+    title: "Hassle-Free Application - Quick and secure loan processing",
     description: "No paperwork. No long queues. Just a few clicks, and you’re done!",
     Icon: Lock,
-    details: ["100% Online Process – Apply anytime, anywhere", "Secure KYC Verification – Digital verification for fast approval", "Track Your Application – Get real-time updates"]
+    details: ["100% Online Process - Apply anytime, anywhere", "Secure KYC Verification - Digital verification for fast approval", "Track Your Application - Get real-time updates"]
     // badge: "Coming Soon"
   }
 ];
