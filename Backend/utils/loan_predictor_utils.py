@@ -3,7 +3,7 @@ from models import LoanApplication
 import os
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
-from utils.loader import model, scaler, explainer
+from utils.loader import pipeline, explainer
 
 load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
@@ -27,6 +27,9 @@ async def predict_with_shap(data: LoanApplication):
         data.cibil_score
     ]], columns=FEATURES)
 
+    scaler = pipeline.named_steps['scaler']
+    model = pipeline.named_steps['model'].model 
+    
     input_data_scaled = scaler.transform(input_data)
     prediction = model.predict(input_data_scaled)[0][0]
 

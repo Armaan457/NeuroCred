@@ -1,21 +1,49 @@
-import keras
+import mlflow
+import mlflow.sklearn
 import joblib
+import os
 from concurrent.futures import ThreadPoolExecutor
 
-def load_model():
-    return keras.models.load_model('saved_models/loan_approval_model.keras', compile=False)
+current_file_dir = os.path.dirname(os.path.abspath(__file__))
+mlruns_path = os.path.join(current_file_dir, "..", "..", "Notebooks", "mlruns")
+mlruns_path = os.path.abspath(mlruns_path)
 
-def load_scaler():
-    return joblib.load('saved_models/robust_scaler.joblib')
+mlflow.set_tracking_uri(f"file://{mlruns_path}")
+mlflow.set_experiment("loan_approval_experiment")
 
-def load_explainer():
-    return joblib.load('saved_models/shap_explainer.joblib')
+def load_pipeline_and_explainer():
+    def load_pipeline():
+        return mlflow.sklearn.load_model("models:/loan_approval_model/latest")
 
-with ThreadPoolExecutor() as executor:
-    model_future = executor.submit(load_model)
-    scaler_future = executor.submit(load_scaler)
-    explainer_future = executor.submit(load_explainer)
+    def load_explainer():
+        try:
+            client = mlflow.tracking.MlflowClient()
+            model_versions = client.get_latest_versions("loan_approval_model", stages=["None"])
+            if not model_versions:
+                raise Exception("No model versions found")
+            
+            model_version = model_versions[0]
+            run_id = model_version.run_id
+            
+            artifact_path = mlflow.artifacts.download_artifacts(
+                run_id=run_id, 
+                artifact_path="shap_explainer/shap_explainer.joblib"
+            )
+            return joblib.load(artifact_path)
+        except Exception as e:
+            print(f"Warning: Could not load SHAP explainer from MLflow: {e}")
+            if os.path.exists('saved_models/shap_explainer.joblib'):
+                return joblib.load('saved_models/shap_explainer.joblib')
+            else:
+                return None
 
-    model = model_future.result()
-    scaler = scaler_future.result()
-    explainer = explainer_future.result()
+    with ThreadPoolExecutor() as executor:
+        pipeline_future = executor.submit(load_pipeline)
+        explainer_future = executor.submit(load_explainer)
+
+        pipeline = pipeline_future.result()
+        explainer = explainer_future.result()
+    
+    return pipeline, explainer
+
+pipeline, explainer = load_pipeline_and_explainer()

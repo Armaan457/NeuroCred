@@ -178,14 +178,30 @@ const LoanApplicationForm: React.FC = () => {
   };
 
   const getFactorColor = (value: number, allValues: number[]) => {
-    const sortedValues = [...allValues].sort((a, b) => Math.abs(b) - Math.abs(a));
-    const rank = sortedValues.indexOf(value);
+    const absValue = Math.abs(value);
+    const maxAbsValue = Math.max(...allValues.map(v => Math.abs(v)));
     
-    if (rank === 0) return '#F44336'; // Highest impact - Red
-    if (rank === 1) return '#FF9800'; // High impact - Orange
-    if (rank === 2) return '#FFC107'; // Medium impact - Amber
-    if (rank === 3) return '#8BC34A'; // Low impact - Light Green
-    return '#9E9E9E'; // Lowest impact - Grey
+    // Normalize the intensity based on the maximum absolute value (0 to 1)
+    const intensity = maxAbsValue > 0 ? absValue / maxAbsValue : 0;
+    
+    if (value > 0) {
+      // Positive values - Lighter green shades
+      if (intensity >= 0.8) return '#4CAF50'; // Medium green (was dark)
+      if (intensity >= 0.6) return '#66BB6A'; // Regular green
+      if (intensity >= 0.4) return '#81C784'; // Light green
+      if (intensity >= 0.2) return '#A5D6A7'; // Lighter green
+      return '#C8E6C9'; // Very light green
+    } else if (value < 0) {
+      // Negative values - Lighter red shades
+      if (intensity >= 0.8) return '#F44336'; // Medium red (was dark)
+      if (intensity >= 0.6) return '#EF5350'; // Regular red
+      if (intensity >= 0.4) return '#E57373'; // Light red
+      if (intensity >= 0.2) return '#EF9A9A'; // Lighter red
+      return '#FFCDD2'; // Very light red
+    } else {
+      // Zero or very close to zero - Neutral grey
+      return '#9E9E9E';
+    }
   };
 
   return (
@@ -365,7 +381,10 @@ const LoanApplicationForm: React.FC = () => {
                           className="factor-indicator"
                           style={{ backgroundColor: factorColor }}
                         ></div>
-                        <span className="factor-value">
+                        <span 
+                          className="factor-value"
+                          style={{ color: factorColor }}
+                        >
                           {impactValue >= 0 ? '+' : ''}{impactValue.toFixed(2)}%
                         </span>
                       </div>
