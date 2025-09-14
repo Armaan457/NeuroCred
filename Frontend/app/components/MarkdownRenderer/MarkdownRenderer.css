@@ -1,0 +1,81 @@
+/* Base markdown content styles */
+.markdown-content {
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Ensure proper spacing in different contexts */
+.explanation-content {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+  margin-top: 10px;
+}
+
+.suggestions-content {
+  background: #f0f9ff;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #0ea5e9;
+  margin-top: 10px;
+}
+
+.bot-message-content {
+  /* Inherit the existing chatbot message styling */
+  color: inherit;
+}
+
+/* Override some default markdown styles for better integration */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  color: #2c3e50;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content h1:first-child,
+.markdown-content h2:first-child,
+.markdown-content h3:first-child,
+.markdown-content h4:first-child {
+  margin-top: 0;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1rem;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+}
+
+/* Specific adjustments for chatbot context */
+.bot-message-content .markdown-content {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.bot-message-content h1,
+.bot-message-content h2,
+.bot-message-content h3,
+.bot-message-content h4 {
+  font-size: 1.1em;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.bot-message-content p {
+  margin-bottom: 0.5rem;
+}
+
+.bot-message-content ul,
+.bot-message-content ol {
+  margin-bottom: 0.5rem;
+}
