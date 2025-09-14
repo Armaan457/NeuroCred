@@ -277,7 +277,7 @@ const LoanApplicationForm: React.FC = () => {
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
         .replace(/`([^`]+)`/g, '$1')     // Remove code formatting
         .replace(/^\s*[-*+]\s+/gm, '• ') // Convert bullet points
-        .replace(/^\s*\d+\.\s+/gm, (match, offset, string) => {
+        .replace(/^\s*\d+\.\s+/gm, (match) => {
           const num = match.match(/\d+/)?.[0];
           return `${num}. `;
         }) // Clean numbered lists
@@ -720,12 +720,6 @@ End of Report
                     // Method 1: Impact Score (0-100 scale based on relative importance)
                     const relativeImpact = maxAbsValue > 0 ? Math.abs(numValue) / maxAbsValue : 0;
                     // Use a minimum threshold to avoid showing 0 for very small but non-zero values
-                    const impactScore = relativeImpact < 0.01 && numValue !== 0 
-                      ? 1 // Show at least 1 for non-zero values
-                      : Math.round(relativeImpact * 100);
-                    
-                    // Method 2: Raw SHAP value with better formatting
-                    const formattedValue = numValue.toFixed(4);
                     
                     // Method 3: Impact level description
                     const getImpactLevel = (relativeImpact: number, rawValue: number) => {

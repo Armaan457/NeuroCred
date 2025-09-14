@@ -19,7 +19,7 @@ const Hero = () => {
             </h1>
             
             <p className="text-xl text-gray-600 font-medium max-w-2xl">
-            Experience intelligent loan eligibility predictions and credit scoring simulations. Learn about financial decision making through our advanced AI models. Please note that we're an educational and prediction platform, not a lending institution.
+            Experience intelligent loan eligibility predictions and credit scoring simulations. Learn about financial decision making through our advanced AI models. Please note that we&apos;re an educational and prediction platform, not a lending institution.
             </p>
             
             <div className="pt-4">

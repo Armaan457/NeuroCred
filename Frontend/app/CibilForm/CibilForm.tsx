@@ -249,7 +249,7 @@ const CibilScoreForm: React.FC = () => {
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
         .replace(/`([^`]+)`/g, '$1')     // Remove code formatting
         .replace(/^\s*[-*+]\s+/gm, '• ') // Convert bullet points
-        .replace(/^\s*\d+\.\s+/gm, (match, offset, string) => {
+        .replace(/^\s*\d+\.\s+/gm, (match) => {
           const num = match.match(/\d+/)?.[0];
           return `${num}. `;
         }) // Clean numbered lists
