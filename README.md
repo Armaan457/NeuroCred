@@ -21,12 +21,16 @@ NeuroCred is a comprehensive full stack fintech platform that empowers users wit
 ### 4. MLOps and Tracking
 - Uses MLflow for experiment tracking and DVC for data versioning
 
+### 5. Authentication & Security
+- JWT (JSON Web Token) based authentication system
+
 ## Tech Stack
 
 - **Frontend**: Next, Framer Motion and Tailwind CSS
 - **Backend**: FastAPI
 - **AI/ML**: TensorFlow, SHAP and LangChain
 - **MLOps**: MLflow and DVC
+- **Database**: Mongo and Chroma
 
 ## Setup
 
@@ -57,12 +61,8 @@ NeuroCred is a comprehensive full stack fintech platform that empowers users wit
    ```bash
    pip install -r requirements.txt
    ```
-5. Create a `.env` file and add your Groq API key:
-   ```env
-   GROQ_API_KEY = ...
-   ```
 
-6. Run the server:
+5. Run the server:
    ```bash
    python main.py
    ```
