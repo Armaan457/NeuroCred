@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class LoanApplication(BaseModel):
     no_of_dependents: int
@@ -19,3 +19,12 @@ class CIBILScoreRequest(BaseModel):
     has_credit_card: bool = False
     num_inquiries_6months: int = 0
     num_new_accounts_6months: int = 0
+
+class UserSignup(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
