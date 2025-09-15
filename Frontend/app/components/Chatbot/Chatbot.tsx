@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiService } from '../../services/api';
 import MarkdownRenderer from '../MarkdownRenderer/MarkdownRenderer';
+import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/navigation';
 import './Chatbot.css';
 
 interface Message {
@@ -26,6 +28,8 @@ const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,6 +47,13 @@ const Chatbot: React.FC = () => {
 
   const sendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Redirect to login if not authenticated
+      router.push('/Login');
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -66,7 +77,8 @@ const Chatbot: React.FC = () => {
       };
 
       setMessages(prev => [...prev, botMessage]);
-    } catch {
+    } catch (error) {
+      console.error('Chat error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: 'Sorry, I encountered an error while processing your question. Please try again.',

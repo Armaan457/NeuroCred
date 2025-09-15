@@ -1,9 +1,12 @@
+"use client"
+
 import LoanForm from "./LoanForm"
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function Home() {
   return (
-    <>
-    <LoanForm />
-    </>
+    <ProtectedRoute>
+      <LoanForm />
+    </ProtectedRoute>
   );
 }

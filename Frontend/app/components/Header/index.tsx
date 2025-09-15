@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 
 const NavItem = ({ href, children }) => (
   <li>
@@ -24,6 +25,7 @@ const navBarLinks = [
 const Navbar = () => {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
+  const { isAuthenticated, logout } = useAuth();
 
   React.useEffect(() => {
     const resizeListener = () => {
@@ -53,10 +55,10 @@ const Navbar = () => {
         <div className="flex items-center space-x-2">
           {/* Mobile Console Button */}
           <button
-            onClick={() => router.push("/SignUp")}
+            onClick={() => isAuthenticated ? logout() : router.push("/SignUp")}
             className="px-2 py-1 text-sm block lg:hidden bg-gray-500 text-white rounded hover:bg-gray-600"
           >
-            SignUp
+            {isAuthenticated ? 'Sign Out' : 'Sign Up'}
           </button>
 
           {/* Mobile Menu Button */}
@@ -97,10 +99,10 @@ const Navbar = () => {
 
           {/* Desktop Console Button */}
           <button
-            onClick={() => router.push("/SignUp")}
+            onClick={() => isAuthenticated ? logout() : router.push("/SignUp")}
             className="px-4 py-2 text-base hidden lg:block bg-black text-white rounded hover:bg-gray-600"
           >
-            SignUp
+            {isAuthenticated ? 'Sign Out' : 'Sign Up'}
           </button>
         </div>
       </div>

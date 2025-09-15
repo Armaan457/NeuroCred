@@ -1,6 +1,22 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Types for API requests and responses
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface SignupData {
+  full_name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+}
+
 export interface LoanApplicationData {
   no_of_dependents: number;
   education: string;
@@ -50,12 +66,18 @@ async function apiCall<T>(
     'Content-Type': 'application/json',
   };
 
+  // Add authorization header if token exists
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
   const response = await fetch(url, {
     ...options,
     headers: {
       ...defaultHeaders,
+      ...authHeaders,
       ...options.headers,
     },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -68,6 +90,33 @@ async function apiCall<T>(
 
 // API service functions
 export const apiService = {
+  // Authentication
+  login: async (data: LoginData): Promise<AuthResponse> => {
+    return apiCall<AuthResponse>('/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  signup: async (data: SignupData): Promise<any> => {
+    return apiCall<any>('/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  logout: async (): Promise<any> => {
+    return apiCall<any>('/logout', {
+      method: 'POST',
+    });
+  },
+
+  refreshToken: async (): Promise<AuthResponse> => {
+    return apiCall<AuthResponse>('/refresh', {
+      method: 'POST',
+    });
+  },
+
   // Loan prediction
   predictLoanApproval: async (data: LoanApplicationData): Promise<LoanPredictionResponse> => {
     return apiCall<LoanPredictionResponse>('/predict', {
@@ -89,6 +138,7 @@ export const apiService = {
     const params = new URLSearchParams({ query });
     return apiCall<ChatResponse>(`/chat?${params}`, {
       method: 'POST',
+      body: JSON.stringify({}), // Send an empty body to satisfy the request parameter
     });
   },
 };

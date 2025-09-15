@@ -127,7 +127,7 @@ async def calculate_cibil(request: CIBILScoreRequest, user=Depends(get_current_u
         )
 
 @router.post("/chat")
-async def chat(request, query: str = Query(..., title="Search Query"), user=Depends(get_current_user)):
+async def chat(query: str = Query(..., title="Search Query"), user=Depends(get_current_user)):
     try:
         response = await chain.ainvoke(query)
         return {"answer": response.content}
