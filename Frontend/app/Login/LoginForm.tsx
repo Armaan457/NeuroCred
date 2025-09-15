@@ -68,8 +68,9 @@ const LoginForm: React.FC<LoginFormProps> = () => {
         await signup(formData.fullName, formData.email, formData.password);
         router.push('/');
       }
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

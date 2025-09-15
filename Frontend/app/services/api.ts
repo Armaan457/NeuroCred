@@ -55,6 +55,17 @@ export interface ChatResponse {
   answer: string;
 }
 
+export interface SignupResponse {
+  message: string;
+  user_id?: string;
+  // Add any other fields that might be returned by your API
+}
+
+export interface LogoutResponse {
+  message: string;
+  // Add any other fields that might be returned by your API
+}
+
 // Generic API call function
 async function apiCall<T>(
   endpoint: string,
@@ -98,15 +109,15 @@ export const apiService = {
     });
   },
 
-  signup: async (data: SignupData): Promise<any> => {
-    return apiCall<any>('/signup', {
+  signup: async (data: SignupData): Promise<SignupResponse> => {
+    return apiCall<SignupResponse>('/signup', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  logout: async (): Promise<any> => {
-    return apiCall<any>('/logout', {
+  logout: async (): Promise<LogoutResponse> => {
+    return apiCall<LogoutResponse>('/logout', {
       method: 'POST',
     });
   },
