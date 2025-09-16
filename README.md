@@ -1,6 +1,6 @@
 # NeuroCred
 
-NeuroCred is a comprehensive full stack fintech platform that empowers users with AI-driven financial insights and decision making tools. The platform leverages advanced deep learning models to provide loan approval predictions, CIBIL score calculations, and intelligent financial guidance through an AI chatbot.
+NeuroCred is a comprehensive full stack fintech platform that empowers users with AI-driven financial insights and decision making tools. The platform leverages advanced machine learning models to provide loan approval predictions, CIBIL score calculations, and intelligent financial guidance through an AI chatbot.
 
 ## Features
 
