@@ -1,0 +1,5 @@
+outs:
+- md5: b2977ad21ce400015fb61e18eef96254
+  size: 5995
+  hash: md5
+  path: chatbot_data.txt

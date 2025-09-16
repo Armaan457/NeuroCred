@@ -6,6 +6,8 @@ __pycache__
 
 # DVC tracked files
 Notebooks/data/loan_approval_dataset.csv
+Notebooks/data/chatbot_data.txt
+
 
 # MLflow artifacts
 mlruns/

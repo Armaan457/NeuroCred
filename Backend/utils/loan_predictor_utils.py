@@ -28,10 +28,10 @@ async def predict_with_shap(data: LoanApplication):
     ]], columns=FEATURES)
 
     scaler = pipeline.named_steps['scaler']
-    model = pipeline.named_steps['model'].model 
+    model = pipeline.named_steps['model'] 
     
     input_data_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_data_scaled)[0][0]
+    prediction = model.predict_proba(input_data_scaled)[0][1]
 
     shap_values = explainer(input_data_scaled)
     shap_dict = dict(zip(FEATURES, shap_values.values[0].round(4)))
@@ -48,7 +48,7 @@ async def get_explanation(shap_dict, prediction):
 
     **Input Data:**
     - **Predicted Status:** {prediction_status} (e.g., "Approved" or "Declined")
-    - **Key Factors:** A dictionary of factors and their influence on the prediction:
+    - **Key Factors:** A dictionary of factors and their influence on the prediction (shap values from the prediction model):
     - Number of Dependents: {shap_dict.get('no_of_dependents', 0):.4f}
     - Education Level: {shap_dict.get('education', 0):.4f}
     - Employment Type: {shap_dict.get('self_employed', 0):.4f}
@@ -73,7 +73,7 @@ async def get_explanation(shap_dict, prediction):
     - **Maintain a Supportive and Professional Tone.**
 
     **Important:**
-    - Do not state the explicit values of the factors.
+    - Do not state the explicit values of the factors or the fact that they are shap values.
     """
     
     response = llm.invoke(prompt)

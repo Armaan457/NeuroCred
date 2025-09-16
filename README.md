@@ -28,7 +28,7 @@ NeuroCred is a comprehensive full stack fintech platform that empowers users wit
 
 - **Frontend**: Next, Framer Motion and Tailwind CSS
 - **Backend**: FastAPI
-- **AI/ML**: TensorFlow, SHAP and LangChain
+- **AI/ML**: XGboost, SHAP and LangChain
 - **MLOps**: MLflow and DVC
 - **Database**: Mongo and Chroma
 
