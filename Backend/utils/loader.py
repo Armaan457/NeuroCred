@@ -11,18 +11,20 @@ mlruns_path = os.path.abspath(mlruns_path)
 mlflow.set_tracking_uri(f"file://{mlruns_path}")
 mlflow.set_experiment("loan_approval_experiment")
 
+MODEL_NAME = "loan_approval_model"
+MODEL_VERSION = "3"
+
 def load_pipeline_and_explainer():
     def load_pipeline():
-        return mlflow.sklearn.load_model("models:/loan_approval_model/latest")
+        return mlflow.sklearn.load_model(f"models:/{MODEL_NAME}/{MODEL_VERSION}")
 
     def load_explainer():
         try:
             client = mlflow.tracking.MlflowClient()
-            model_versions = client.get_latest_versions("loan_approval_model", stages=["None"])
-            if not model_versions:
-                raise Exception("No model versions found")
-            
-            model_version = model_versions[0]
+            model_version = client.get_model_version(MODEL_NAME, MODEL_VERSION)
+            if not model_version:
+                raise Exception(f"Model {MODEL_NAME} version {MODEL_VERSION} not found")
+
             run_id = model_version.run_id
             
             artifact_path = mlflow.artifacts.download_artifacts(

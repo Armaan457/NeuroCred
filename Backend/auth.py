@@ -4,10 +4,15 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from db import users_collection
 from bson.objectid import ObjectId
 
 router = APIRouter()
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
