@@ -14,6 +14,8 @@ db = client[DB_NAME]
 
 users_collection = db["users"]
 refresh_tokens_collection = db["refresh_tokens"]
+loan_history_collection = db["loan_history"]
+cibil_history_collection = db["cibil_history"]
 
 
 async def store_refresh_token(user_id: str, token: str):

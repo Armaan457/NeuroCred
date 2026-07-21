@@ -132,6 +132,13 @@ const LoginForm: React.FC<LoginFormProps> = () => {
               {showPassword ? "👁️" : "👁️‍🗨️"}
             </button>
           </div>
+          {isLogin && (
+            <div className="text-right -mt-2">
+              <a href="/ForgotPassword" className="text-sm text-purple-600 hover:text-purple-800 transition-colors">
+                Forgot password?
+              </a>
+            </div>
+          )}
           {!isLogin && (
             <div className="form-group">
               <input

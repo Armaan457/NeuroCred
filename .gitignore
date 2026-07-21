@@ -5,15 +5,13 @@ chroma_db_new
 __pycache__
 
 # DVC tracked files
-Notebooks/data/loan_approval_dataset.csv
-Notebooks/data/chatbot_data.txt
+*.csv
+*.txt
 
 
 # MLflow artifacts
 mlruns/
 
-# Node.js dependencies
-node_modules/
 
 # Python cache
 *.pyc

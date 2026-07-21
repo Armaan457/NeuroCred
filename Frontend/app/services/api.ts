@@ -66,6 +66,51 @@ export interface LogoutResponse {
   // Add any other fields that might be returned by your API
 }
 
+export interface PasswordResetRequestData {
+  email: string;
+}
+
+export interface PasswordResetConfirmData {
+  token: string;
+  new_password: string;
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
+export interface LoanHistoryItem {
+  id: string;
+  user_id: string;
+  inputs: LoanApplicationData;
+  outputs: {
+    approve_chances: number;
+    shap_values: Record<string, number>;
+    reason: string;
+  };
+  created_at: string;
+}
+
+export interface LoanHistoryResponse {
+  loan_history: LoanHistoryItem[];
+}
+
+export interface CIBILHistoryItem {
+  id: string;
+  user_id: string;
+  inputs: CIBILScoreData;
+  outputs: {
+    cibil_score: number;
+    breakdown: Record<string, number>;
+    suggestions: string;
+  };
+  created_at: string;
+}
+
+export interface CIBILHistoryResponse {
+  cibil_history: CIBILHistoryItem[];
+}
+
 // Generic API call function
 async function apiCall<T>(
   endpoint: string,
@@ -128,6 +173,20 @@ export const apiService = {
     });
   },
 
+  requestPasswordReset: async (data: PasswordResetRequestData): Promise<MessageResponse> => {
+    return apiCall<MessageResponse>('/request-password-reset', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  resetPassword: async (data: PasswordResetConfirmData): Promise<MessageResponse> => {
+    return apiCall<MessageResponse>('/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
   // Loan prediction
   predictLoanApproval: async (data: LoanApplicationData): Promise<LoanPredictionResponse> => {
     return apiCall<LoanPredictionResponse>('/predict', {
@@ -141,6 +200,19 @@ export const apiService = {
     return apiCall<CIBILScoreResponse>('/calculate_cibil', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  },
+
+  // History
+  getLoanHistory: async (): Promise<LoanHistoryResponse> => {
+    return apiCall<LoanHistoryResponse>('/history/loan', {
+      method: 'GET',
+    });
+  },
+
+  getCibilHistory: async (): Promise<CIBILHistoryResponse> => {
+    return apiCall<CIBILHistoryResponse>('/history/cibil', {
+      method: 'GET',
     });
   },
 

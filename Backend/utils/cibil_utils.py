@@ -105,24 +105,61 @@ class CIBILScoreCalculator:
 
 llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
 
-async def get_improvement_suggestions(score, breakdown):
+async def get_improvement_suggestions(input_data, score, breakdown):
     prompt = f"""
-    You are an expert financial advisor specializing in credit scores and their improvement.
+    You are an expert financial advisor specializing in credit health and CIBIL score improvement.
+    Analyze the provided credit profile to deliver a concise, personalized credit health assessment.
 
-    **Task:**
-    1. Provide actionable strategies to improve a CIBIL score.
-    2. Separate the advice into distinct "Short-Term Strategies" and "Long-Term Strategies" sections.
-    3. The advice should be specific to the provided score or breakdown.
-    4. The output should be a helpful, informative response to the user.
+    IMPORTANT:
+    This assessment provides financial guidance, not an official credit bureau evaluation. The score breakdown is your absolute source of truth for identifying strengths and weaknesses. Use the applicant's credit profile values exclusively to personalize explanations and recommendations—never invent habits or make unsupported assumptions.
 
-    **Constraints:**
-    - Do not mention or reference the specific CIBIL score or breakdown provided in the input.
-    - Do not mention that you are an AI or that you are generating the advice based on context.
-    - Maintain a professional and authoritative tone.
-    - Be concise and to the point.
+    **Current CIBIL Score:** {score}
 
-    CIBIL score: {score}
-    Breakdown: {breakdown}
-        """
+    **Score Breakdown (Source of Truth):**
+    - Payment History: {breakdown["payment_history"] * 100:.0f}%
+    - Credit Utilization: {breakdown["credit_utilization"] * 100:.0f}%
+    - Credit Age: {breakdown["credit_age"] * 100:.0f}%
+    - Credit Mix: {breakdown["credit_mix"] * 100:.0f}%
+    - New Credit: {breakdown["new_credit"] * 100:.0f}%
+
+    **Credit Profile:**
+    - On-time Payments: {input_data.get("on_time_payments_percent", 0)}%
+    - Average Days Late: {input_data.get("days_late_avg", 0)}
+    - Credit Utilization: {input_data.get("utilization_percent", 0)}%
+    - Credit Age: {input_data.get("credit_age_years", 0)} years
+    - Secured Loans: {input_data.get("num_secured_loans", 0)}
+    - Unsecured Loans: {input_data.get("num_unsecured_loans", 0)}
+    - Has Credit Card: {"Yes" if input_data.get("has_credit_card", False) else "No"}
+    - Credit Inquiries (Last 6 Months): {input_data.get("num_inquiries_6months", 0)}
+    - New Accounts (Last 6 Months): {input_data.get("num_new_accounts_6months", 0)}
+
+    ---
+
+    ### Output Structure
+
+    #### 1. Credit Health Summary
+    - Explain what the score indicates using these ranges:
+    - **750+**: Excellent (focus on maintenance, not overhaul)
+    - **700–749**: Good
+    - **650–699**: Fair
+    - **Below 650**: Needs Improvement
+    - Match tone to the score category.
+
+    #### 2. Key Strengths
+    - Highlight the strongest contributors based on the score breakdown.
+    - Seamlessly integrate exact values from the profile (e.g., "Your credit utilization of 30% is healthy...").
+
+    #### 3. Areas to Improve
+    - Focus strictly on the weakest components from the breakdown, ranked by impact.
+    - Frame as "optimization opportunities" if the overall score is already excellent (750+).
+
+    #### 4. Personalized Recommendations
+    - Provide 3–5 actionable, highly targeted recommendations directly linked to the weakest score components.
+    - Tailor each point using the profile data.
+    - **Rules:** Never suggest actions that contradict strong areas (e.g., do not suggest lowering utilization if already low, or opening accounts solely to boost age).
+
+    #### 5. Closing
+    - End with a short, encouraging message focused on maintenance (if high score) or gradual progress (if lower score).
+    """
     response = llm.invoke(prompt)
     return response.content
