@@ -373,26 +373,49 @@ export default function HistoryPage() {
                                   transition={{ duration: 0.3 }}
                                   className="border-t border-gray-100 bg-gray-50 p-5 space-y-4"
                                 >
-                                  {/* Score Breakdown */}
-                                  {item.outputs.breakdown && (
+                                  {/* Submitted Inputs */}
+                                  {item.inputs && (
                                     <div className="bg-white p-5 rounded-xl border border-gray-200">
                                       <h4 className="font-semibold text-gray-800 mb-3">
-                                        Score Contribution Breakdown
+                                        Submitted Inputs
                                       </h4>
                                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                        {Object.entries(item.outputs.breakdown).map(([key, val]) => (
-                                          <div
-                                            key={key}
-                                            className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center"
-                                          >
-                                            <span className="text-sm text-gray-600 capitalize">
-                                              {key.replace(/_/g, ' ')}
-                                            </span>
-                                            <span className="text-sm font-semibold text-gray-900">
-                                              {val} pts
-                                            </span>
-                                          </div>
-                                        ))}
+                                        {Object.entries({
+                                          on_time_payments_percent: 'On-time Payments',
+                                          days_late_avg: 'Average Days Late',
+                                          utilization_percent: 'Credit Utilization',
+                                          credit_age_years: 'Credit Age (Years)',
+                                          num_secured_loans: 'Secured Loans',
+                                          num_unsecured_loans: 'Unsecured Loans',
+                                          has_credit_card: 'Has Credit Card',
+                                          num_inquiries_6months: 'Inquiries (6 Months)',
+                                          num_new_accounts_6months: 'New Accounts (6 Months)',
+                                        }).map(([key, label]) => {
+                                          const rawVal = item.inputs[key as keyof typeof item.inputs];
+                                          let displayVal = 'N/A';
+                                          if (rawVal !== undefined && rawVal !== null) {
+                                            if (typeof rawVal === 'boolean') {
+                                              displayVal = rawVal ? 'Yes' : 'No';
+                                            } else if (key === 'on_time_payments_percent' || key === 'utilization_percent') {
+                                              displayVal = `${rawVal}%`;
+                                            } else {
+                                              displayVal = String(rawVal);
+                                            }
+                                          }
+                                          return (
+                                            <div
+                                              key={key}
+                                              className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center"
+                                            >
+                                              <span className="text-sm text-gray-600">
+                                                {label}
+                                              </span>
+                                              <span className="text-sm font-semibold text-gray-900">
+                                                {displayVal}
+                                              </span>
+                                            </div>
+                                          );
+                                        })}
                                       </div>
                                     </div>
                                   )}

@@ -1,90 +1,57 @@
-# NeuroCred
+#  NeuroCred
 
-NeuroCred is a comprehensive full stack fintech platform that empowers users with AI-driven financial insights and decision making tools. The platform leverages advanced machine learning models to provide loan approval predictions, CIBIL score calculations, and intelligent financial guidance through an AI chatbot.
+**NeuroCred** is a comprehensive, full-stack fintech platform designed to empower users with AI-driven financial insights and decision-making tools. The platform leverages advanced machine learning models to provide loan approval predictions with SHAP-based explainability, estimates CIBIL scores with personalized improvement guidance, and offers interactive financial counseling via a RAG-powered AI chatbot.
+
+<p align="center">
+  <img src="assets/home.png" alt="NeuroCred Home" width="800"/>
+</p>
+
+---
 
 ## Features
 
-### 1. Loan Approval Prediction
-- Predicts the chances of loan approval based on user inputs
-- Provides SHAP-based explainability for influencing factors
-- Generates human understandable insights
+### Loan Approval Prediction & Explainability
+- **98% Accurate Loan Approval Prediction:** Predicts loan approval from applicant financial profiles.
+- **Decision Explainability:** Highlights the factors influencing each prediction.
+- **Natural Language Explanations:** Explains predictions in clear, easy-to-understand language.
 
-### 2. CIBIL Score Calculation
-- Calculates an estimated CIBIL score based on key credit factors
-- Provides a breakdown of score components
-- Offers AI generated improvement suggestions
+<p align="center">
+  <img src="assets/loan_pred.png" alt="SHAP Explainability Analysis" width="85%" />
+</p>
 
-### 3. Loans & Finance Chatbot
-- Answers finance and loan related queries
-- Uses Chroma vector database for retrieving relevant information
+---
 
-### 4. MLOps and Tracking
-- Uses MLflow for experiment tracking and DVC for data versioning
+### CIBIL Score Analytics
+- **CIBIL Score Estimation:** Estimates CIBIL scores using key credit factors.
+- **Credit Health Summary:** Provides an overview of the calculated score.
+- **AI Recommendations:** Generates personalized suggestions to improve credit health.
 
-### 5. Authentication & Security
-- JWT (JSON Web Token) based authentication system
+<p align="center">
+  <img src="assets/cibil_pred.png" alt="CIBIL Score Analytics" width="85%" />
+</p>
 
-## Tech Stack
+---
 
-- **Frontend**: Next, Framer Motion and Tailwind CSS
-- **Backend**: FastAPI
-- **AI/ML**: XGboost, SHAP and LangChain
-- **MLOps**: MLflow and DVC
-- **Database**: Mongo and Chroma
+### Financial Assistant
+- **Financial Q&A:** Answers questions on loans, credit scores, and personal finance.
+- **Retrieval-Augmented Responses:** Uses relevant financial knowledge to answer queries.
 
-## Setup
+<p align="center">
+  <img src="assets/cbot.png" alt="Chatbot Conversation Interface" width="85%" />
+</p>
 
+---
 
-### Backend 
+### MLOps
+- **Experiment Tracking:** Logs model experiments, metrics, and artifacts.
+- **Data Versioning:** Tracks dataset versions for reproducible workflows.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Armaan457/NeuroCred
-   ```
-2. Navigate to the `Backend` directory:
-   ```bash
-   cd Backend
-   ```
-3. Create and activate a virtual environment:
-   - **macOS/Linux:**
-     ```bash
-     python -m venv env
-     source env/bin/activate
-     ```
-   - **Windows:**
-     ```bash
-     python -m venv env
-     env\Scripts\activate
-     ```
+<p align="center">
+  <img src="assets/mlflow_dash.png" alt="MLflow Dashboard" width="85%" />
+</p>
 
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+---
 
-5. Run the server:
-   ```bash
-   python main.py
-   ```
-
-### Frontend 
-
-1. Navigate to the `Frontend` directory:
-    ```bash
-    cd Frontend
-    ```
-
-2. Install dependencies
-    ```bash
-    npm install
-    ```
-
-3. Start development server
-    ```bash
-    npm run dev
-    ```
-
-## Developers
-
-- [Armaan Jagirdar](https://github.com/Armaan457)
-- [Khusham Bansal](https://github.com/KhushamBansal)
+### Authentication & History
+- **Secure Authentication:** User login and session management.
+- **History Tracking:** Stores previous loan predictions and CIBIL checks.
