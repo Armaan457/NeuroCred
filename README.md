@@ -53,7 +53,8 @@
 ---
 
 ### Authentication & History
-- **Secure Authentication:** User login and session management.
+- **Secure Authentication:** User signup, login, and JWT-based session management.
+- **Password Recovery:** Reset passwords securely via email.
 - **History Tracking:** Stores previous loan predictions and CIBIL checks.
 
 ---
@@ -68,3 +69,8 @@
 | **AI / ML** | Scikit-learn, SHAP and LangChain |
 | **MLOps** | MLflow and DVC |
 | **Authentication** | JWT |
+
+## Developers
+
+- [Armaan Jagirdar](https://github.com/Armaan457)
+- [Khusham Bansal](https://github.com/KhushamBansal)
